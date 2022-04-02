@@ -1,0 +1,46 @@
+---
+- name: This is Project1 YML
+  hosts: all
+  become: yes
+  gather_facts: yes
+  vars:
+    tools2install: [openjdk-11-jdk, python3, jenkins]
+    
+  tasks:
+
+   - name: Add JENKINS pkg to the download inventory 
+     shell: wget -q -O - https://pkg.jenkins.io/debian/jenkins.io.key | sudo apt-key add
+     become: yes
+
+   - name: Add JENKINS pkg 2nd location
+     shell: sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list' 
+     become: yes
+
+   - name: Install all packages {{ tools2install }}
+      
+     apt:
+       name: "{{ item }}"
+       state: latest
+       update_cache: yes
+
+     with_items:
+       - "{{ tools2install }}"
+
+
+   - name: Jenkins version (after)
+     command: jenkins --version
+     register: jenkins_result
+   - debug:
+      msg: " {{ jenkins_result }}"
+
+   - name: PYTHON version (after)
+     command: python3 --version
+     register: python_result
+   - debug:
+      msg: " {{ python_result }}"
+
+   - name: JAVA version (after)
+     command: java -version
+     register: java_result
+   - debug:
+      msg: " {{ java_result }}"
